@@ -26,7 +26,7 @@ public class Utils {
 
     public static JSONObject getJSON(String coord){
         try {
-            URL url = new URL(String.format((API), coord));
+            URL url = new URL(API + coord);
 
             HttpURLConnection connection =
                     (HttpURLConnection)url.openConnection();
@@ -52,52 +52,4 @@ public class Utils {
             return null;
         }
     }
-
-    /* static String getWeatherJSONString(String coord) {
-        try {
-            URL url = new URL(String.format((API), coord));
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            InputStream in = new BufferedInputStream(conn.getInputStream());
-            String response = convertStreamToString(in);
-            return response;
-        } catch (MalformedURLException e) {
-            Log.e("error", e.getMessage());
-        } catch (IOException e) {
-            Log.e("error", e.getMessage());
-        }
-        return "404";
-    }
-
-    static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    } //ty stackOverflow
-
-    static class JSONHandler extends AsyncTask<String, Void, String> {
-        Context context;
-
-        private JSONHandler() {
-
-        }
-        public JSONHandler(Context context) {
-            this.context = context;
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            if (strings.length == 1) {
-                String pokemonName = strings[0];
-                return getWeatherJSONString(pokemonName);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            TextView textView = (TextView) ((Activity) context).findViewById(R.id.tempText);
-            textView.setText(s);
-        }
-    } */
 }

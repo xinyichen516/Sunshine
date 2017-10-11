@@ -35,7 +35,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.json.JSONObject;
 
@@ -50,12 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        TextView tempText = (TextView) findViewById(R.id.tempText);
         Button poweredBy = (Button) findViewById(R.id.poweredBy);
         poweredBy.setOnClickListener(this);
-        TextView rainText = (TextView) findViewById(R.id.rainText);
-        TextView descriptionText = (TextView) findViewById(R.id.weatherSumText);
 
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -79,19 +80,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private class GetWeatherInfo extends AsyncTask<String, Void, String> {
+    private class GetWeatherInfo extends AsyncTask<String, Void, ArrayList> {
 
         Context context;
+        String rainTime;
+        boolean willRain = false;
 
         private GetWeatherInfo() {}
 
         private GetWeatherInfo(Context context) {this.context = context;}
 
         @Override
-        protected String doInBackground(String... strings) {
+        protected ArrayList<Object> doInBackground(String... strings) {
             String coordinates = strings[0];
-            //JSONObject data = Utils.getJSON(coordinates);
-            return getWeatherJSONString(coordinates);
+            JSONObject result = Utils.getJSON(coordinates);
+            ArrayList<Object> returned = new ArrayList<>();
+            try {
+                String currTemp = result.getJSONObject("currently").getString("temperature");
+                Integer tempInt = (int) Float.parseFloat(currTemp);
+                returned.add(tempInt);
+
+                String description = result.getJSONObject("daily").getString("summary");
+                returned.add(description);
+
+                JSONArray minutes = result.getJSONObject("minutely").getJSONArray("data");
+                int i = 0;
+                while (i < minutes.length() && willRain == false) {
+                    if (minutes.getJSONObject(i).getString("precipProbability").equals("1")) {
+                        rainTime = minutes.getJSONObject(i).getString("time");
+                        willRain = true;
+                    }
+                    i++;
+                }
+                if (willRain == false) {
+                    returned.add("It's not going to rain!");
+                } else {
+                    String formatted = new SimpleDateFormat("h:mm a", Locale.US).format(new Date(Long.getLong(rainTime) * 1000L));
+                    returned.add(formatted);
+                }
+
+            } catch (Exception e) {
+                e.getMessage();
+            }
+            return returned;
+            //return getWeatherJSONString(coordinates);
         }
 
         @Override
@@ -101,12 +133,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-        protected void onPostExecute(String result) {
-            
-            TextView textView = (TextView) ((Activity) context).findViewById(R.id.tempText);
-            textView.setText(result);
-            // might want to change "executed" for the returned string passed
-            // into onPostExecute() but that is upto you
+        protected void onPostExecute(ArrayList result) {
+            ((TextView) ((Activity) context).findViewById(R.id.tempText)).setText(result.get(0) + "");
+            ((TextView) ((Activity) context).findViewById(R.id.weatherSumText)).setText(result.get(1) + "");
+            ((TextView) ((Activity) context).findViewById(R.id.rainText)).setText(result.get(2) + "");
         }
     }
 
@@ -136,27 +166,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-
-    static String getWeatherJSONString(String coordinates) {
-        try {
-            URL url = new URL(Utils.API + coordinates);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            InputStream in = new BufferedInputStream(conn.getInputStream());
-            String response = convertStreamToString(in);
-            return response;
-        } catch (MalformedURLException e) {
-            Log.e("error", e.getMessage());
-        } catch (IOException e) {
-            Log.e("error", e.getMessage());
-        }
-        return "404";
-    }
-
-    static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    } //ty stackOverflow
-
 
 }
