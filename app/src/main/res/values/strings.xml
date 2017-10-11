@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Sunshine</string>
     <string name="powered">Powered by Dark Sky</string>
+    <string name="text"> </string>
+    <string name="weatherName">SUNSHINE</string>
+    <string name="atYour">Weather at Your Fingertips</string>
 </resources>

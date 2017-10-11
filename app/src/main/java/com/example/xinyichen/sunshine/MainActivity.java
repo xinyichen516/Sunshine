@@ -72,72 +72,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void onSuccess(Location location) {
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
-                                new GetWeatherInfo(MainActivity.this).execute(location.getLatitude() + "," + location.getLongitude());
+                                new Utils.GetWeatherInfo(MainActivity.this).execute(location.getLatitude() + "," + location.getLongitude());
                             }
                         }
                     });
         }
 
-    }
-
-    private class GetWeatherInfo extends AsyncTask<String, Void, ArrayList> {
-
-        Context context;
-        String rainTime;
-        boolean willRain = false;
-
-        private GetWeatherInfo() {}
-
-        private GetWeatherInfo(Context context) {this.context = context;}
-
-        @Override
-        protected ArrayList<Object> doInBackground(String... strings) {
-            String coordinates = strings[0];
-            JSONObject result = Utils.getJSON(coordinates);
-            ArrayList<Object> returned = new ArrayList<>();
-            try {
-                String currTemp = result.getJSONObject("currently").getString("temperature");
-                Integer tempInt = (int) Float.parseFloat(currTemp);
-                returned.add(tempInt);
-
-                String description = result.getJSONObject("daily").getString("summary");
-                returned.add(description);
-
-                JSONArray minutes = result.getJSONObject("minutely").getJSONArray("data");
-                int i = 0;
-                while (i < minutes.length() && willRain == false) {
-                    if (minutes.getJSONObject(i).getString("precipProbability").equals("1")) {
-                        rainTime = minutes.getJSONObject(i).getString("time");
-                        willRain = true;
-                    }
-                    i++;
-                }
-                if (willRain == false) {
-                    returned.add("It's not going to rain!");
-                } else {
-                    String formatted = new SimpleDateFormat("h:mm a", Locale.US).format(new Date(Long.getLong(rainTime) * 1000L));
-                    returned.add(formatted);
-                }
-
-            } catch (Exception e) {
-                e.getMessage();
-            }
-            return returned;
-            //return getWeatherJSONString(coordinates);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Toast.makeText(MainActivity.this,"JSON Data is downloading",Toast.LENGTH_LONG).show();
-
-        }
-
-        protected void onPostExecute(ArrayList result) {
-            ((TextView) ((Activity) context).findViewById(R.id.tempText)).setText(result.get(0) + "");
-            ((TextView) ((Activity) context).findViewById(R.id.weatherSumText)).setText(result.get(1) + "");
-            ((TextView) ((Activity) context).findViewById(R.id.rainText)).setText(result.get(2) + "");
-        }
     }
 
 
