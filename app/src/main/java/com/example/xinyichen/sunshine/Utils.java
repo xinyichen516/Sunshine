@@ -32,7 +32,6 @@ public class Utils {
                     (HttpURLConnection)url.openConnection();
             connection.getInputStream();
 
-
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(connection.getInputStream()));
 
@@ -45,15 +44,18 @@ public class Utils {
             JSONObject data = new JSONObject(json.toString());
 
             return data;
-        }catch(Exception e){
+
+        } catch(Exception e){
+
             e.printStackTrace();
+
             return null;
         }
     }
 
-    static String getWeatherJSONString(String coord) {
+    /* static String getWeatherJSONString(String coord) {
         try {
-            URL url = new URL(API + coord);
+            URL url = new URL(String.format((API), coord));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             InputStream in = new BufferedInputStream(conn.getInputStream());
@@ -97,5 +99,5 @@ public class Utils {
             TextView textView = (TextView) ((Activity) context).findViewById(R.id.tempText);
             textView.setText(s);
         }
-    }
+    } */
 }
