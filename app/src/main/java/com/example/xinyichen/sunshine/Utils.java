@@ -95,7 +95,7 @@ public class Utils {
                     returned.add("It's not going to rain!");
                 } else {
                     String formatted = new SimpleDateFormat("h:mm a", Locale.US).format(new Date(Long.getLong(rainTime) * 1000L));
-                    returned.add(formatted);
+                    returned.add("It's going to rain at" + formatted + ". Wear a raincoat!");
                 }
 
             } catch (Exception e) {

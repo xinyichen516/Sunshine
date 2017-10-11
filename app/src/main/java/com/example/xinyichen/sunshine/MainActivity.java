@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,10 +48,8 @@ import org.json.JSONObject;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-    int PERMISSION_ACCESS_COARSE_LOCATION = 1;
-    Map temp;
     private FusedLocationProviderClient mFusedLocationClient;
-
+    boolean tempInFah = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         Button poweredBy = (Button) findViewById(R.id.poweredBy);
         poweredBy.setOnClickListener(this);
+        ConstraintLayout tempLayout = (ConstraintLayout) findViewById(R.id.tempLayout);
+        tempLayout.setOnClickListener(this);
 
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -77,6 +79,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
         }
+
+        /*
+        tried to only show rain icon if the string wasn't that it was not going to rain
+         */
+
+        ImageView drop = (ImageView) findViewById(R.id.droplet);
+        if (((TextView) findViewById(R.id.rainText)).getText().toString() != "It's not going to rain!" + "") {
+            drop.setVisibility(View.INVISIBLE);
+        } else {
+            drop.setImageResource(R.drawable.ic_drop);
+            drop.setVisibility(View.VISIBLE);
+        }
+        /*
+        attempted to switch between hot and cold icons but got a NullPointerException
+         */
+        ((ImageView) findViewById(R.id.hotCold)).setVisibility(View.INVISIBLE);
+        /* String temp = ((TextView) (findViewById(R.id.tempText))).getText().toString();
+        String[] splitted = temp.split("\u00b0");
+        Integer tempInF = Integer.parseInt(splitted[0]);
+        ImageView hotCold = (ImageView) findViewById(R.id.hotCold);
+
+        if (tempInF >= 80) {
+            hotCold.setImageResource(R.drawable.ic_fire);
+            hotCold.setVisibility(View.VISIBLE);
+        } else if (tempInF <= 55) {
+            hotCold.setImageResource(R.drawable.ic_snowflake);
+            hotCold.setVisibility(View.VISIBLE);
+        } else {
+            hotCold.setVisibility(View.INVISIBLE);
+        } */
 
     }
 
@@ -103,6 +135,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Uri uri = Uri.parse("http://darksky.net/poweredby/");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
+                break;
+            case R.id.tempLayout:
+                String temp = ((TextView) (findViewById(R.id.tempText))).getText().toString();
+                String[] splited = temp.split("\\s+");
+                Integer tempInF = Integer.parseInt(splited[0]);
+                if (tempInFah) {
+                    Integer tempInC = (int) ((tempInF - 32) / (1.8));
+                    ((TextView) (findViewById(R.id.tempText))).setText(tempInC + " \u00b0 C");
+                } else {
+                    Integer tempInC = (int) (tempInF * 1.8) + 32;
+                    ((TextView) (findViewById(R.id.tempText))).setText(tempInC + " \u00b0 F");
+                }
+                tempInFah = !tempInFah;
                 break;
         }
     }
