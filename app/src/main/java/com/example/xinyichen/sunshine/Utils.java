@@ -22,7 +22,7 @@ import java.net.URL;
  */
 
 public class Utils {
-    final static String API = "https://api.darksky.net/forecast/423a191d69058abd2c4c98832c332adc/%s";
+    final static String API = "https://api.darksky.net/forecast/423a191d69058abd2c4c98832c332adc/";
 
     public static JSONObject getJSON(String coord){
         try {
